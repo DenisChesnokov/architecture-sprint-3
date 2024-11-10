@@ -1,0 +1,39 @@
+@startuml
+!include <C4/C4_Container.puml>
+
+Person(User, "Пользователь", "Управляет устройствами и получает уведомления")
+System_Boundary(SmartHomeSystem, "Экосистема умного дома") {
+    Container(API_Gateway, "API Gateway", "nginx", "Маршрутизация запросов от пользователей")
+    Container(Microservice_DevicesControl, "Микросервис управления устройствами", "Java/Spring Boot", "Управление всеми умными устройствами в доме (отопление, освещение, ворота)")
+    Container(Microservice_Automation, "Микросервис сценариев автоматизации", "Java/Spring Boot", "Обработка пользовательских сценариев для автоматизации (например, включение света при открытии ворот)")
+    Container(Microservice_Telemetry, "Микросервис телеметрии", "Java/Spring Boot", "Сбор данных от всех подключённых устройств (температура, движение и т.д.)")
+    Container(Microservice_Auth, "Микросервис аутентификации", "Java/Spring Boot", "Управление пользователями и правами доступа")
+    Container(Microservice_Notifications, "Микросервис уведомлений", "Java/Spring Boot", "Отправка уведомлений пользователям о событиях в системе (например: протечка воды)")
+
+    ContainerDb(Database_DevicesControl, "База данных управления устройствами", "PostgreSQL", "Хранение данных об устройствах")
+    ContainerDb(Database_Automation, "База данных сценариев автоматизации", "PostgreSQL", "Хранение пользовательских сценариев")
+    ContainerDb(Database_Telemetry, "База данных телеметрии", "PostgreSQL", "Хранение телеметрических данных")
+    ContainerDb(Database_Auth, "База данных аутентификации", "PostgreSQL", "Хранение данных пользователей и прав доступа")
+
+    Container(KafkaBus, "Шина данных Kafka", "Kafka", "Асинхронное взаимодействие между микросервисами")
+}
+
+Rel(User, API_Gateway, "Запросы на управление устройствами / настройка сценариев / просмотр телеметрии")
+Rel(API_Gateway, Microservice_DevicesControl, "Маршрутизация запросов на управление устройствами")
+Rel(API_Gateway, Microservice_Telemetry, "Маршрутизация запросов на получение телеметрии")
+Rel(API_Gateway, Microservice_Automation, "Маршрутизация запросов на управление сценариями автоматизации")
+Rel(API_Gateway, Microservice_Auth, "Проверка прав доступа")
+
+Rel(Microservice_DevicesControl, Database_DevicesControl, "Чтение/Запись данных об устройствах")
+Rel(Microservice_Automation, Database_Automation, "Чтение/Запись сценариев автоматизации")
+Rel(Microservice_Telemetry, Database_Telemetry, "Чтение/Запись телеметрических данных")
+Rel(Microservice_Auth, Database_Auth, "Чтение/Запись данных пользователей")
+
+Rel(Microservice_Telemetry, KafkaBus, "Отправка данных о состоянии устройств (например: температура)")
+Rel(KafkaBus, Microservice_Automation, "Получение событий для запуска сценариев автоматизации")
+
+Rel(Microservice_Telemetry, Microservice_Notifications, "Отправка событий для уведомлений (например: протечка воды)")
+Rel(Microservice_Automation, Microservice_Notifications,  "Отправка событий для уведомлений (например: запуск сценария)")
+Rel(Microservice_Notifications, User,"Отправка уведомлений через SMS/Push/Email")
+
+@enduml

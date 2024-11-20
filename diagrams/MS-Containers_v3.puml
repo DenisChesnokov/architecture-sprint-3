@@ -1,0 +1,45 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(User, "Пользователь", "Управляет устройствами через веб или мобильное приложение")
+System_Boundary(SmartHomeSystem, "Экосистема умного дома") {
+    Container(WebApp, "Веб-приложение", "React", "Интерфейс для управления устройствами")
+    Container(API_Gateway, "API Gateway", "nginx", "Маршрутизация запросов от пользователей (REST)")
+    Container(Microservice_DevicesControl, "Микросервис управления устройствами", "Java/Spring Boot", "Управление всеми умными устройствами в доме (отопление, освещение, ворота)")
+    Container(Microservice_Automation, "Микросервис сценариев автоматизации", "Java/Spring Boot", "Обработка пользовательских сценариев для автоматизации (например, включение света при открытии ворот)")
+    Container(Microservice_Telemetry, "Микросервис телеметрии", "Java/Spring Boot", "Сбор данных от всех подключённых устройств (температура, движение и т.д.)")
+    Container(Microservice_Auth, "Микросервис аутентификации", "Java/Spring Boot", "Управление пользователями и правами доступа")
+
+    ContainerDb(Database_DevicesControl, "База данных управления устройствами", "PostgreSQL", "Хранение данных об устройствах")
+    ContainerDb(Database_Automation, "База данных сценариев автоматизации", "PostgreSQL", "Хранение пользовательских сценариев")
+    ContainerDb(Database_Telemetry, "База данных телеметрии", "PostgreSQL", "Хранение телеметрических данных")
+    ContainerDb(Database_Auth, "База данных аутентификации", "PostgreSQL","Хранение данных пользователей и прав доступа")
+
+    Container(KafkaBus,"Шина данных Kafka","Kafka protocol","Асинхронное взаимодействие между микросервисами")
+}
+
+System_Ext(MobileApp,"Мобильное приложение","Flutter","Мобильный интерфейс для управления устройствами")
+System_Ext(ExternalSensorsSystem,"Система датчиков","","Передача данных о температуре и состоянии устройств (HTTP/WebSockets)")
+
+Rel(User, WebApp,  "Использует через браузер")
+Rel(User, MobileApp,"Использует через мобильное приложение")
+
+Rel(WebApp ,API_Gateway ,"REST API")
+Rel(MobileApp ,API_Gateway ,"REST API")
+
+Rel(API_Gateway ,Microservice_DevicesControl ,"REST API")
+Rel(API_Gateway ,Microservice_Telemetry ,"REST API")
+Rel(API_Gateway ,Microservice_Automation ,"REST API")
+Rel(API_Gateway ,Microservice_Auth ,"REST API")
+
+Rel(Microservice_DevicesControl ,Database_DevicesControl ,"JDBC/SQL")
+Rel(Microservice_Automation ,Database_Automation ,"JDBC/SQL")
+Rel(Microservice_Telemetry ,Database_Telemetry ,"JDBC/SQL")
+Rel(Microservice_Auth ,Database_Auth ,"JDBC/SQL")
+
+Rel(Microservice_Telemetry,KafkaBus,"Отправка данных о состоянии устройств (Kafka protocol)")
+Rel(KafkaBus ,Microservice_Automation,"Получение событий для запуска сценариев (Kafka protocol)")
+
+Rel(ExternalSensorsSystem ,Microservice_Telemetry,"Передача данных о температуре и состоянии устройств (HTTP/WebSockets)")
+
+@enduml

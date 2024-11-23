@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Component.puml>
+
+Container_Boundary(DevicesControlServiceBoundary, "Микросервис управления устройствами") {
+    Component(APIController_DevicesControl, "Контроллер API", "", "Обрабатывает HTTP-запросы пользователей на управление устройствами")
+    Component(CommandHandler_DevicesControl, "Обработчик команд", "", "Обрабатывает команды управления устройствами")
+    Component(DeviceStateManager_DevicesControl, "Менеджер состояния устройств", "", "Отслеживает текущее состояние устройств")
+    Component(DeviceRepository_DevicesControl, "Репозиторий устройств", "", "Хранит и извлекает данные об устройствах из базы данных")
+
+    ComponentDb(DevicesControlDatabaseComponentDb,"База данных управления устройствами","PostgreSQL")
+
+    Rel(APIController_DevicesControl, CommandHandler_DevicesControl, "Вызовы команд")
+    Rel(CommandHandler_DevicesControl, DeviceStateManager_DevicesControl, "Управление состоянием устройства")
+    Rel(DeviceStateManager_DevicesControl, DeviceRepository_DevicesControl, "Чтение/Запись состояния устройств")
+    Rel(DeviceRepository_DevicesControl, DevicesControlDatabaseComponentDb, "Чтение/Запись данных в базе данных")
+}
+@enduml

@@ -1,0 +1,21 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(DevicesControlServiceBoundary,"Микросервис управления устройствами") {
+    Component(APIController_DevicesControl,"Контроллер API","Spring MVC","Обрабатывает HTTP-запросы пользователей на управление устройствами через REST API")
+    Component(CommandHandler_DevicesControl,"Обработчик команд","","Обрабатывает команды управления устройствами")
+    Component(DeviceStateManager_DevicesControl,"Менеджер состояния устройств","","Отслеживает текущее состояние устройств")
+    Component(DeviceRepository_DevicesControl,"Репозиторий устройств","","Хранит и извлекает данные об устройствах из базы данных")
+
+    Component(ProtocolAdapter,"Адаптер протоколов","HTTP/WebSocket","Адаптирует протоколы связи с реальными устройствами")
+
+    ComponentDb(DevicesControlDatabaseComponentDb,"База данных управления устройствами","PostgreSQL")
+
+    Rel(APIController_DevicesControl ,CommandHandler_DevicesControl ,"Вызовы команд")
+    Rel(CommandHandler_DevicesControl ,DeviceStateManager_DevicesControl ,"Управляет состоянием устройства")
+    Rel(DeviceStateManager_DevicesControl ,DeviceRepository_DevicesControl ,"Чтение/Запись состояния устройств")
+    Rel(DeviceRepository_DevicesControl ,DevicesControlDatabaseComponentDb ,"Чтение/Запись данных в базе данных")
+
+    Rel(DeviceStateManager_DevicesControl ,ProtocolAdapter ,"Отправляет команды на устройства через HTTP/WebSocket")
+}
+@enduml

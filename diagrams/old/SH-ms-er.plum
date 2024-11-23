@@ -1,0 +1,61 @@
+@startuml
+entity "Пользователь" as User {
+    +id : UUID
+    --
+    name : String
+    email : String
+    password_hash : String
+    role : String
+}
+
+entity "Дом" as House {
+    +id : UUID
+    --
+    user_id : UUID  <<FK>>
+    address : String
+}
+
+entity "Устройство" as Device {
+    +id : UUID
+    --
+    type_id : UUID  <<FK>>
+    house_id : UUID  <<FK>>
+    serial_number : String
+    status : String
+}
+
+entity "Тип устройства" as DeviceType {
+    +id : UUID
+    --
+    name : String
+    description : String
+}
+
+entity "Модуль" as Module {
+    +id : UUID
+    --
+    name : String
+    description : String
+}
+
+entity "Телеметрия" as TelemetryData {
+    +id : UUID
+    --
+    device_id : UUID  <<FK>>
+    timestamp : DateTime
+    data_type : String
+    value : Float
+}
+
+entity "Модуль_Устройство" as ModuleDevice {
+   +module_id : UUID <<FK>>
+   +device_id : UUID <<FK>>
+}
+
+User ||--o{ House : "1:N"
+House ||--o{ Device : "1:N"
+Device }|--|| DeviceType : "N:1"
+Device ||--o{ TelemetryData : "1:N"
+Module ||--o{ ModuleDevice : "M:N"
+Device ||--o{ ModuleDevice : "M:N"
+@enduml

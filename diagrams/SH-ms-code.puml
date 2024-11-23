@@ -1,0 +1,51 @@
+@startuml
+class APIController {
+   +handleRequest(command: DeviceCommand): void
+}
+
+class CommandHandler {
+   +handleCommand(command: DeviceCommand): void
+}
+
+class DeviceCommand {
+   +deviceId: String
+   +commandType: CommandType
+}
+
+enum CommandType {
+   TURN_ON
+   TURN_OFF
+}
+
+class DeviceStateManager {
+   +getState(deviceId: String): DeviceState
+   +updateState(deviceId: String, state: DeviceState): void
+}
+
+class DeviceRepository {
+   +save(deviceState: DeviceState): void
+   +findByDeviceId(deviceId: String): DeviceState
+}
+
+class KafkaProducer {
+   +sendEvent(event: DeviceEvent): void
+}
+
+class DeviceEvent {
+   +deviceId: String
+   +eventType: EventType
+}
+
+enum EventType {
+   STATE_CHANGED
+}
+
+APIController --> CommandHandler : вызывает команду
+CommandHandler --> DeviceStateManager : управляет состоянием устройства
+DeviceStateManager --> DeviceRepository : сохраняет/извлекает состояние устройства
+DeviceStateManager --> KafkaProducer : отправляет событие об изменении состояния устройства в Kafka
+
+CommandHandler --> DeviceCommand : получает команду от пользователя
+KafkaProducer --> DeviceEvent : отправляет событие об изменении состояния устройства
+
+@enduml

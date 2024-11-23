@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context.puml>
+
+Person(User, "Пользователь", "Взаимодействует с системой через веб-интерфейс")
+System(SmartHomeMonolith, "Smart Home Monolith", "Монолитное приложение для управления отоплением и мониторинга температуры")
+System_Ext(TemperatureSensor, "Датчик температуры", "Отправляет данные о температуре в систему")
+SystemDb(PostgreSQL, "PostgreSQL", "База данных для хранения информации о пользователях и температуре")
+
+Rel(User, SmartHomeMonolith, "Управление отоплением / Просмотр температуры")
+Rel(TemperatureSensor, SmartHomeMonolith, "Отправка данных о температуре")
+Rel(SmartHomeMonolith, PostgreSQL, "Чтение/Запись данных")
+
+@enduml

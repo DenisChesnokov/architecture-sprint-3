@@ -1,0 +1,70 @@
+@startuml
+entity "Пользователь" as User {
+    +id : UUID <<PK>>
+    --
+    name : String <<required>>
+    email : String <<required>>
+    password_hash : String <<required>>
+}
+
+entity "Дом" as House {
+    +id : UUID <<PK>>
+    --
+    address : String <<required>>
+}
+
+entity "Устройство" as Device {
+    +id : UUID <<PK>>
+    --
+    type_id : UUID <<FK>> <<required>>
+    house_id : UUID <<FK>> <<required>>
+    serial_number : String <<required>>
+    status : DeviceStatusEnum <<required>>
+}
+
+entity DeviceStatusEnum {
+   +Включено
+   +Выключено
+}
+
+entity "Тип устройства" as DeviceType {
+    +id : UUID <<PK>>
+    --
+    name : String <<required>>
+}
+
+entity "Модуль" as Module {
+   +id : UUID <<PK>>
+   --
+   name : String <<required>>
+}
+
+entity ModuleDevice {
+   +module_id : UUID <<FK>> <<PK>>
+   +device_id : UUID <<FK>> <<PK>>
+}
+
+entity TelemetryData {
+   +id : UUID <<PK>>
+   --
+   module_id : UUID <<FK>> <<required>>
+   timestamp : DateTime <<required>>
+   data_type : String <<required>>
+   value : Float <<required>>
+}
+
+entity UserHouse {
+   +user_id : UUID <<FK>> <<PK>>
+   +house_id : UUID <<FK>> <<PK>>
+   role: String <<required>>  // Атрибут роли перемещён сюда
+}
+
+User ||--o{ UserHouse : "1:N"
+House ||--o{ UserHouse : "1:N"
+House ||--o{ Device : "1:N"
+Device ||--o| DeviceType : "N:1"
+Module ||--o{ ModuleDevice : "M:N"
+Device ||--o{ ModuleDevice : "M:N"
+Module ||--o{ TelemetryData : "1:N"
+Device ||--|{ DeviceStatusEnum : "N:1"
+@enduml
